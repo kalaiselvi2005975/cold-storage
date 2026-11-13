@@ -219,14 +219,7 @@ firebase deploy --only hosting
 
 ---
 
-## 🔒 Security Notice
 
-* Never commit production service account private keys or sensitive API keys directly to version control.
-* Keep secret configurations in `.secret.local` (included in `.gitignore`) or use environment variables in Firebase Cloud Functions.
 
----
 
-## 👩‍💻 Author
 
-Developed by **[kalaiselvi2005975](https://github.com/kalaiselvi2005975)**  
-For questions, feedback, or collaborations, feel free to open an issue or reach out via GitHub!
