@@ -1,0 +1,19 @@
+{
+  "name": "cold-storage-functions",
+  "description": "Firebase Cloud Functions for Smart Cold Storage — FCM Push & AI Image Analysis",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "npx firebase-tools functions:shell",
+    "start": "npm run serve",
+    "deploy": "npx firebase-tools deploy --only functions",
+    "logs": "npx firebase-tools functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^4.6.0"
+  },
+  "private": true
+}

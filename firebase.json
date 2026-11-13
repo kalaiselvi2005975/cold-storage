@@ -1,0 +1,42 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "functions/**"
+    ],
+    "headers": [
+      {
+        "source": "/firebase-messaging-sw.js",
+        "headers": [
+          {
+            "key": "Service-Worker-Allowed",
+            "value": "/"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/api/sendTestNotification",
+        "function": "sendTestNotification"
+      },
+      {
+        "source": "/api/analyzeImage",
+        "function": "analyzeImage"
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "database": {
+    "rules": "database.rules.json"
+  }
+}

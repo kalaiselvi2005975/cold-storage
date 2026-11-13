@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Fruit & Vegetable Cold Storage Management System</title>
+  
+  <!-- SEO & Meta Tags -->
+  <meta name="description" content="Smart Fruit & Vegetable Cold Storage Management System — 3-chamber IoT monitoring with AI visual quality assessment, real-time temperature/humidity tracking, and intelligent cooling control.">
+  <meta name="theme-color" content="#0b0f19">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Firebase SDK Compat JS -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <div class="brand-logo" id="logoIcon">
+          <i class="fa-solid fa-snowflake"></i>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">Smart Cold Storage</h1>
+          <span class="brand-subtitle">Fruit & Vegetable Management System</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live vs Demo Mode Toggle Button -->
+        <button class="mode-pill demo-active" id="demoModeToggle" title="Click to toggle between DEMO MODE and LIVE FIREBASE MODE">
+          <i class="fa-solid fa-flask"></i>
+          <span id="modeText">DEMO MODE</span>
+        </button>
+
+        <!-- System Connection Status -->
+        <div class="status-indicator">
+          <span class="dot online" id="systemOnlineDot"></span>
+          <span id="systemOnlineText">System Online</span>
+        </div>
+
+        <span class="last-updated-text" id="lastUpdatedHeader">Updated: --:--:--</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="app-container">
+
+    <!-- Desktop Navigation Tabs -->
+    <nav class="main-nav" id="desktopNav">
+      <button class="nav-tab active" data-tab="tab-overview">
+        <i class="fa-solid fa-gauge-high"></i> Dashboard
+      </button>
+      <button class="nav-tab" data-tab="tab-crops">
+        <i class="fa-solid fa-wheat-awn"></i> Produce Settings
+      </button>
+      <button class="nav-tab" data-tab="tab-analytics">
+        <i class="fa-solid fa-chart-line"></i> History
+      </button>
+      <button class="nav-tab" data-tab="tab-alerts">
+        <i class="fa-solid fa-triangle-exclamation"></i> Alerts
+        <span class="badge-count" id="alertBadgeCount">0</span>
+      </button>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 1: MAIN DASHBOARD — 3 CHAMBER CARDS                  -->
+    <!-- ============================================================ -->
+    <section class="tab-content active" id="tab-overview">
+      <div class="section-header">
+        <h2 class="section-title"><i class="fa-solid fa-boxes-stacked"></i> Chamber Overview</h2>
+        <div class="status-indicator">
+          <span class="dot online" id="overviewStatusDot"></span>
+          <span id="overviewStatusText" style="font-weight:600; color: var(--status-normal);">ALL NORMAL</span>
+        </div>
+      </div>
+
+      <div class="chambers-grid three-col">
+
+        <!-- ==================== CHAMBER 1 CARD ==================== -->
+        <div class="chamber-card" id="cardChamber1">
+          <div class="chamber-header">
+            <div class="chamber-title-group">
+              <span class="chamber-badge">CHAMBER 1</span>
+            </div>
+            <div class="crop-badge-pill" id="c1CropPill">
+              <span id="c1CropIcon">🍅</span>
+              <span id="c1CropName">Tomato</span>
+            </div>
+          </div>
+
+          <!-- Chamber Status Indicator -->
+          <div class="chamber-status-bar" id="c1StatusBar">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="c1ChamberStatus">NORMAL</span>
+          </div>
+
+          <!-- Sensor Readings -->
+          <div class="sensor-widgets-container">
+            <div class="sensor-box">
+              <div class="sensor-header">
+                <span>TEMPERATURE</span>
+                <i class="fa-solid fa-temperature-low" style="color: var(--accent-cyan);"></i>
+              </div>
+              <div class="sensor-value-large">
+                <span id="c1Temp">14.8</span> <span class="sensor-unit">°C</span>
+              </div>
+            </div>
+
+            <div class="sensor-box">
+              <div class="sensor-header">
+                <span>HUMIDITY</span>
+                <i class="fa-solid fa-droplet" style="color: var(--accent-blue);"></i>
+              </div>
+              <div class="sensor-value-large">
+                <span id="c1Humidity">72</span> <span class="sensor-unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Target & Cooling Info -->
+          <div class="chamber-info-grid">
+            <div class="info-item">
+              <span class="info-label">Target Temp</span>
+              <span class="info-value" id="c1TargetTemp">14.0°C</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Temp Source</span>
+              <span class="info-value" id="c1TempSource">Recommended</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Temp Status</span>
+              <span class="info-value" id="c1TempStatus" style="color: var(--primary);">NORMAL</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Fan / Cooling</span>
+              <span class="info-value" id="c1FanStatus"><i class="fa-solid fa-fan" style="color:var(--text-muted);"></i> OFF</span>
+            </div>
+          </div>
+
+          <!-- Produce Condition -->
+          <div class="produce-condition-box" id="c1ProduceCondition">
+            <div class="condition-header">
+              <span>Produce Condition</span>
+              <span class="condition-badge good" id="c1ConditionBadge">—</span>
+            </div>
+            <div class="condition-summary" id="c1ConditionSummary">No AI assessment yet</div>
+          </div>
+
+          <!-- Last Updated -->
+          <div class="chamber-last-updated">
+            <i class="fa-solid fa-clock"></i> <span id="c1LastUpdated">--:--</span>
+          </div>
+
+          <!-- CHECK IMAGE Button -->
+          <button class="check-image-btn" id="c1CheckImageBtn" onclick="openCameraForChamber('C1')">
+            <i class="fa-solid fa-camera"></i> CHECK IMAGE
+          </button>
+        </div>
+
+        <!-- ==================== CHAMBER 2 CARD ==================== -->
+        <div class="chamber-card" id="cardChamber2">
+          <div class="chamber-header">
+            <div class="chamber-title-group">
+              <span class="chamber-badge" style="background: rgba(2, 132, 199, 0.15); color: var(--accent-blue); border-color: rgba(2, 132, 199, 0.3);">CHAMBER 2</span>
+            </div>
+            <div class="crop-badge-pill" id="c2CropPill">
+              <span id="c2CropIcon">🥕</span>
+              <span id="c2CropName">Carrot</span>
+            </div>
+          </div>
+
+          <div class="chamber-status-bar" id="c2StatusBar">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="c2ChamberStatus">NORMAL</span>
+          </div>
+
+          <div class="sensor-widgets-container">
+            <div class="sensor-box">
+              <div class="sensor-header">
+                <span>TEMPERATURE</span>
+                <i class="fa-solid fa-temperature-low" style="color: var(--accent-cyan);"></i>
+              </div>
+              <div class="sensor-value-large">
+                <span id="c2Temp">8.5</span> <span class="sensor-unit">°C</span>
+              </div>
+            </div>
+            <div class="sensor-box">
+              <div class="sensor-header">
+                <span>HUMIDITY</span>
+                <i class="fa-solid fa-droplet" style="color: var(--accent-blue);"></i>
+              </div>
+              <div class="sensor-value-large">
+                <span id="c2Humidity">80</span> <span class="sensor-unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chamber-info-grid">
+            <div class="info-item">
+              <span class="info-label">Target Temp</span>
+              <span class="info-value" id="c2TargetTemp">1.5°C</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Temp Source</span>
+              <span class="info-value" id="c2TempSource">Recommended</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Temp Status</span>
+              <span class="info-value" id="c2TempStatus" style="color: var(--primary);">NORMAL</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Fan / Cooling</span>
+              <span class="info-value" id="c2FanStatus"><i class="fa-solid fa-fan" style="color:var(--text-muted);"></i> OFF</span>
+            </div>
+          </div>
+
+          <div class="produce-condition-box" id="c2ProduceCondition">
+            <div class="condition-header">
+              <span>Produce Condition</span>
+              <span class="condition-badge good" id="c2ConditionBadge">—</span>
+            </div>
+            <div class="condition-summary" id="c2ConditionSummary">No AI assessment yet</div>
+          </div>
+
+          <div class="chamber-last-updated">
+            <i class="fa-solid fa-clock"></i> <span id="c2LastUpdated">--:--</span>
+          </div>
+
+          <button class="check-image-btn" id="c2CheckImageBtn" onclick="openCameraForChamber('C2')">
+            <i class="fa-solid fa-camera"></i> CHECK IMAGE
+          </button>
+        </div>
+
+        <!-- ==================== CHAMBER 3 CARD ==================== -->
+        <div class="chamber-card" id="cardChamber3">
+          <div class="chamber-header">
+            <div class="chamber-title-group">
+              <span class="chamber-badge" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">CHAMBER 3</span>
+            </div>
+            <div class="crop-badge-pill" id="c3CropPill">
+              <span id="c3CropIcon">🍎</span>
+              <span id="c3CropName">Apple</span>
+            </div>
+          </div>
+
+          <div class="chamber-status-bar" id="c3StatusBar">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="c3ChamberStatus">NORMAL</span>
+          </div>
+
+          <div class="sensor-widgets-container">
+            <div class="sensor-box">
+              <div class="sensor-header">
+                <span>TEMPERATURE</span>
+                <i class="fa-solid fa-temperature-low" style="color: var(--accent-cyan);"></i>
+              </div>
+              <div class="sensor-value-large">
+                <span id="c3Temp">4.2</span> <span class="sensor-unit">°C</span>
+              </div>
+            </div>
+            <div class="sensor-box">
+              <div class="sensor-header">
+                <span>HUMIDITY</span>
+                <i class="fa-solid fa-droplet" style="color: var(--accent-blue);"></i>
+              </div>
+              <div class="sensor-value-large">
+                <span id="c3Humidity">88</span> <span class="sensor-unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chamber-info-grid">
+            <div class="info-item">
+              <span class="info-label">Target Temp</span>
+              <span class="info-value" id="c3TargetTemp">2.0°C</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Temp Source</span>
+              <span class="info-value" id="c3TempSource">Recommended</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Temp Status</span>
+              <span class="info-value" id="c3TempStatus" style="color: var(--primary);">NORMAL</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Fan / Cooling</span>
+              <span class="info-value" id="c3FanStatus"><i class="fa-solid fa-fan" style="color:var(--text-muted);"></i> OFF</span>
+            </div>
+          </div>
+
+          <div class="produce-condition-box" id="c3ProduceCondition">
+            <div class="condition-header">
+              <span>Produce Condition</span>
+              <span class="condition-badge good" id="c3ConditionBadge">—</span>
+            </div>
+            <div class="condition-summary" id="c3ConditionSummary">No AI assessment yet</div>
+          </div>
+
+          <div class="chamber-last-updated">
+            <i class="fa-solid fa-clock"></i> <span id="c3LastUpdated">--:--</span>
+          </div>
+
+          <button class="check-image-btn" id="c3CheckImageBtn" onclick="openCameraForChamber('C3')">
+            <i class="fa-solid fa-camera"></i> CHECK IMAGE
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 2: PRODUCE SETTINGS (Crop Selection + Target Temp)   -->
+    <!-- ============================================================ -->
+    <section class="tab-content" id="tab-crops">
+      <div class="crop-settings-panel">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fa-solid fa-wheat-awn"></i> Produce & Temperature Settings</h2>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+          Select the produce type stored in each chamber. The system will load recommended storage temperatures, or you can set a custom target.
+        </p>
+
+        <div class="crop-selectors-grid three-col">
+
+          <!-- Chamber 1 Produce Config -->
+          <div class="crop-config-card">
+            <h3 style="font-size: 1.1rem; color: var(--primary);">Chamber 1</h3>
+            <label class="config-label">Stored Produce</label>
+            <select class="crop-select-dropdown" id="c1CropSelect" onchange="onCropSelectChange('C1')">
+              <option value="tomato" selected>🍅 Tomato</option>
+              <option value="chilli">🌶️ Green Chilli</option>
+              <option value="cucumber">🥒 Cucumber</option>
+              <option value="brinjal">🍆 Brinjal / Eggplant</option>
+              <option value="carrot">🥕 Carrot</option>
+              <option value="potato">🥔 Potato</option>
+              <option value="onion">🧅 Onion</option>
+              <option value="cabbage">🥬 Cabbage</option>
+              <option value="lettuce">🥗 Lettuce</option>
+              <option value="apple">🍎 Apple</option>
+              <option value="banana">🍌 Banana</option>
+              <option value="orange">🍊 Orange</option>
+              <option value="mango">🥭 Mango</option>
+              <option value="strawberry">🍓 Strawberry</option>
+              <option value="grapes">🍇 Grapes</option>
+              <option value="other">📦 Custom Produce</option>
+            </select>
+
+            <div class="crop-details-box" id="c1CropDetails">
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Category:</span>
+                <span class="crop-detail-val" id="c1RecCategory">Vegetable</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Recommended Range:</span>
+                <span class="crop-detail-val" id="c1RecTemp">10.0°C - 13.0°C</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Recommended Target:</span>
+                <span class="crop-detail-val" style="color: var(--accent-cyan);" id="c1RecOptimalTemp">11.5°C</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Humidity Range:</span>
+                <span class="crop-detail-val" id="c1RecHumidity">85% - 95%</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Storage Life:</span>
+                <span class="crop-detail-val" id="c1RecLife">7 - 14 Days</span>
+              </div>
+            </div>
+
+            <!-- Temperature Mode Selection -->
+            <label class="config-label">Storage Temperature</label>
+            <div class="temp-mode-selector">
+              <label class="radio-option">
+                <input type="radio" name="c1TempMode" value="recommended" checked onchange="onTempModeChange('C1')">
+                <span>Recommended</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="c1TempMode" value="custom" onchange="onTempModeChange('C1')">
+                <span>Custom</span>
+              </label>
+            </div>
+
+            <div class="custom-temp-input" id="c1CustomTempBox" style="display:none;">
+              <label class="config-label">Custom Target Temperature (°C)</label>
+              <input type="number" class="custom-temp-field" id="c1CustomTempInput" placeholder="e.g. 12" step="0.5" min="-5" max="30">
+            </div>
+
+            <button class="apply-crop-btn" onclick="applyCropSettings('C1')">
+              <i class="fa-solid fa-check"></i> Apply to Chamber 1
+            </button>
+          </div>
+
+          <!-- Chamber 2 Produce Config -->
+          <div class="crop-config-card">
+            <h3 style="font-size: 1.1rem; color: var(--accent-blue);">Chamber 2</h3>
+            <label class="config-label">Stored Produce</label>
+            <select class="crop-select-dropdown" id="c2CropSelect" onchange="onCropSelectChange('C2')">
+              <option value="tomato">🍅 Tomato</option>
+              <option value="chilli">🌶️ Green Chilli</option>
+              <option value="cucumber">🥒 Cucumber</option>
+              <option value="brinjal">🍆 Brinjal / Eggplant</option>
+              <option value="carrot" selected>🥕 Carrot</option>
+              <option value="potato">🥔 Potato</option>
+              <option value="onion">🧅 Onion</option>
+              <option value="cabbage">🥬 Cabbage</option>
+              <option value="lettuce">🥗 Lettuce</option>
+              <option value="apple">🍎 Apple</option>
+              <option value="banana">🍌 Banana</option>
+              <option value="orange">🍊 Orange</option>
+              <option value="mango">🥭 Mango</option>
+              <option value="strawberry">🍓 Strawberry</option>
+              <option value="grapes">🍇 Grapes</option>
+              <option value="other">📦 Custom Produce</option>
+            </select>
+
+            <div class="crop-details-box" id="c2CropDetails">
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Category:</span>
+                <span class="crop-detail-val" id="c2RecCategory">Vegetable</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Recommended Range:</span>
+                <span class="crop-detail-val" id="c2RecTemp">0.0°C - 4.0°C</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Recommended Target:</span>
+                <span class="crop-detail-val" style="color: var(--accent-cyan);" id="c2RecOptimalTemp">1.5°C</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Humidity Range:</span>
+                <span class="crop-detail-val" id="c2RecHumidity">95% - 100%</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Storage Life:</span>
+                <span class="crop-detail-val" id="c2RecLife">4 - 6 Months</span>
+              </div>
+            </div>
+
+            <label class="config-label">Storage Temperature</label>
+            <div class="temp-mode-selector">
+              <label class="radio-option">
+                <input type="radio" name="c2TempMode" value="recommended" checked onchange="onTempModeChange('C2')">
+                <span>Recommended</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="c2TempMode" value="custom" onchange="onTempModeChange('C2')">
+                <span>Custom</span>
+              </label>
+            </div>
+
+            <div class="custom-temp-input" id="c2CustomTempBox" style="display:none;">
+              <label class="config-label">Custom Target Temperature (°C)</label>
+              <input type="number" class="custom-temp-field" id="c2CustomTempInput" placeholder="e.g. 8" step="0.5" min="-5" max="30">
+            </div>
+
+            <button class="apply-crop-btn" style="background: var(--accent-blue);" onclick="applyCropSettings('C2')">
+              <i class="fa-solid fa-check"></i> Apply to Chamber 2
+            </button>
+          </div>
+
+          <!-- Chamber 3 Produce Config -->
+          <div class="crop-config-card">
+            <h3 style="font-size: 1.1rem; color: var(--accent-purple);">Chamber 3</h3>
+            <label class="config-label">Stored Produce</label>
+            <select class="crop-select-dropdown" id="c3CropSelect" onchange="onCropSelectChange('C3')">
+              <option value="tomato">🍅 Tomato</option>
+              <option value="chilli">🌶️ Green Chilli</option>
+              <option value="cucumber">🥒 Cucumber</option>
+              <option value="brinjal">🍆 Brinjal / Eggplant</option>
+              <option value="carrot">🥕 Carrot</option>
+              <option value="potato">🥔 Potato</option>
+              <option value="onion">🧅 Onion</option>
+              <option value="cabbage">🥬 Cabbage</option>
+              <option value="lettuce">🥗 Lettuce</option>
+              <option value="apple" selected>🍎 Apple</option>
+              <option value="banana">🍌 Banana</option>
+              <option value="orange">🍊 Orange</option>
+              <option value="mango">🥭 Mango</option>
+              <option value="strawberry">🍓 Strawberry</option>
+              <option value="grapes">🍇 Grapes</option>
+              <option value="other">📦 Custom Produce</option>
+            </select>
+
+            <div class="crop-details-box" id="c3CropDetails">
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Category:</span>
+                <span class="crop-detail-val" id="c3RecCategory">Fruit</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Recommended Range:</span>
+                <span class="crop-detail-val" id="c3RecTemp">0.0°C - 4.0°C</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Recommended Target:</span>
+                <span class="crop-detail-val" style="color: var(--accent-cyan);" id="c3RecOptimalTemp">2.0°C</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Humidity Range:</span>
+                <span class="crop-detail-val" id="c3RecHumidity">90% - 95%</span>
+              </div>
+              <div class="crop-detail-row">
+                <span class="crop-detail-label">Storage Life:</span>
+                <span class="crop-detail-val" id="c3RecLife">3 - 8 Months</span>
+              </div>
+            </div>
+
+            <label class="config-label">Storage Temperature</label>
+            <div class="temp-mode-selector">
+              <label class="radio-option">
+                <input type="radio" name="c3TempMode" value="recommended" checked onchange="onTempModeChange('C3')">
+                <span>Recommended</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="c3TempMode" value="custom" onchange="onTempModeChange('C3')">
+                <span>Custom</span>
+              </label>
+            </div>
+
+            <div class="custom-temp-input" id="c3CustomTempBox" style="display:none;">
+              <label class="config-label">Custom Target Temperature (°C)</label>
+              <input type="number" class="custom-temp-field" id="c3CustomTempInput" placeholder="e.g. 4" step="0.5" min="-5" max="30">
+            </div>
+
+            <button class="apply-crop-btn" style="background: var(--accent-purple);" onclick="applyCropSettings('C3')">
+              <i class="fa-solid fa-check"></i> Apply to Chamber 3
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 3: HISTORY / ANALYTICS                                -->
+    <!-- ============================================================ -->
+    <section class="tab-content" id="tab-analytics">
+      <div class="analytics-panel">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Temperature & Humidity History</h2>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-title">
+              <i class="fa-solid fa-temperature-half" style="color: var(--accent-rose);"></i> Temperature vs Time (°C)
+            </div>
+            <div class="chart-canvas-box">
+              <canvas id="tempChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">
+              <i class="fa-solid fa-droplet" style="color: var(--accent-blue);"></i> Humidity vs Time (%)
+            </div>
+            <div class="chart-canvas-box">
+              <canvas id="humidityChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- SECTION 4: ALERTS                                             -->
+    <!-- ============================================================ -->
+    <section class="tab-content" id="tab-alerts">
+      <div class="alerts-panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-triangle-exclamation"></i> System Alerts</h2>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              Auto-evaluates temperature and humidity against produce requirements
+            </div>
+          </div>
+        </div>
+
+        <button id="webAlarmToggleBtn" class="apply-crop-btn" onclick="toggleWebAlarm()" style="width: 100%; padding: 18px; font-size: 1.1rem; margin-bottom: 20px; background: transparent; border: 2px solid var(--accent-rose); color: var(--accent-rose); justify-content: center; cursor: pointer; position: relative; z-index: 50; touch-action: manipulation;">
+          <i class="fa-solid fa-volume-xmark"></i> Web Alarm OFF (Tap to Turn ON)
+        </button>
+
+        <div class="alert-feed" id="alertFeedList">
+          <!-- Dynamic Alert Items Inserted Here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <strong>Smart Fruit & Vegetable Cold Storage Management System</strong> &bull; 3-Chamber IoT Monitoring &bull; ESP32 + Firebase + AI Visual Quality
+    </footer>
+  </div>
+
+  <!-- AI Camera Modal -->
+  <div class="modal-overlay" id="cameraModal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="cameraModalTitle"><i class="fa-solid fa-camera"></i> Chamber 1 — Visual Quality Check</h3>
+        <button class="modal-close-btn" onclick="closeCameraModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="camera-preview-box">
+        <video id="cameraPreview" autoplay playsinline></video>
+        <canvas id="captureCanvas" style="display:none;"></canvas>
+        <img id="capturedImage" style="display:none;" />
+      </div>
+      <div class="camera-actions">
+        <button class="apply-crop-btn" id="captureBtn" onclick="captureImage()" style="background: var(--accent-cyan);">
+          <i class="fa-solid fa-camera"></i> Capture Image
+        </button>
+        <button class="apply-crop-btn" id="analyzeBtn" onclick="analyzeImage()" style="display:none; background: var(--accent-purple);">
+          <i class="fa-solid fa-brain"></i> Analyze with AI
+        </button>
+        <button class="apply-crop-btn" id="retakeBtn" onclick="retakeImage()" style="display:none; background: var(--accent-amber);">
+          <i class="fa-solid fa-rotate-left"></i> Retake
+        </button>
+      </div>
+
+      <!-- AI Result Display -->
+      <div class="ai-result-panel" id="aiResultPanel" style="display:none;">
+        <h4><i class="fa-solid fa-brain"></i> AI Visual Quality Assessment</h4>
+        <div class="ai-result-grid">
+          <div class="ai-result-item overall">
+            <span class="ai-label">Overall Condition</span>
+            <span class="ai-value" id="aiOverallCondition">—</span>
+          </div>
+          <div class="ai-result-item">
+            <span class="ai-label">Summary</span>
+            <span class="ai-value ai-summary" id="aiSummary">—</span>
+          </div>
+          <div class="ai-result-item">
+            <span class="ai-label">Total Produce</span>
+            <span class="ai-value" id="aiTotalCount">—</span>
+          </div>
+          <div class="ai-counts-row">
+            <div class="ai-count-box good">
+              <span class="ai-count-num" id="aiGoodCount">—</span>
+              <span class="ai-count-label">Good</span>
+            </div>
+            <div class="ai-count-box warning">
+              <span class="ai-count-num" id="aiWarningCount">—</span>
+              <span class="ai-count-label">Warning</span>
+            </div>
+            <div class="ai-count-box spoiled">
+              <span class="ai-count-num" id="aiSpoiledCount">—</span>
+              <span class="ai-count-label">Spoiled</span>
+            </div>
+          </div>
+          <div class="ai-result-item">
+            <span class="ai-label">AI Confidence</span>
+            <span class="ai-value" id="aiConfidence">—</span>
+          </div>
+          <div class="ai-result-item">
+            <span class="ai-label">Checked At</span>
+            <span class="ai-value" id="aiCheckedAt">—</span>
+          </div>
+        </div>
+        <div class="ai-disclaimer">
+          <i class="fa-solid fa-circle-info"></i> This is a visual-only quality assessment. It cannot determine internal freshness, microbial safety, or exact shelf life.
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div class="ai-loading" id="aiLoading" style="display:none;">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <span>Analyzing image with AI...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Sticky Bottom Navigation -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-btn active" data-tab="tab-overview">
+      <i class="fa-solid fa-gauge-high"></i> Dashboard
+    </button>
+    <button class="mobile-nav-btn" data-tab="tab-crops">
+      <i class="fa-solid fa-wheat-awn"></i> Produce
+    </button>
+    <button class="mobile-nav-btn" data-tab="tab-analytics">
+      <i class="fa-solid fa-chart-line"></i> History
+    </button>
+    <button class="mobile-nav-btn" data-tab="tab-alerts">
+      <i class="fa-solid fa-triangle-exclamation"></i> Alerts
+    </button>
+  </nav>
+
+  <!-- Application Logic Scripts -->
+  <script src="crop-database.js?v=5.0"></script>
+  <script src="firebase-config.js?v=5.0"></script>
+  <script src="app.js?v=5.0"></script>
+</body>
+</html>
