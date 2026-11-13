@@ -4,7 +4,7 @@
 [![IoT](https://img.shields.io/badge/IoT-ESP32%20Sensor%20Integration-00979D?logo=arduino&logoColor=white)](https://espressif.com/)
 [![AI-Vision](https://img.shields.io/badge/AI-Visual%20Quality%20Assessment-8B5CF6)](https://cloud.google.com/)
 [![Chart.js](https://img.shields.io/badge/Charts-Chart.js-FF6384?logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 
 An intelligent, multi-chamber IoT cold storage monitoring and automation system engineered to minimize post-harvest losses in agricultural produce. It combines real-time climate telemetry, crop-specific storage logic, automated cooling actuation, and AI-powered visual quality inspection.
 
@@ -19,9 +19,8 @@ An intelligent, multi-chamber IoT cold storage monitoring and automation system 
 - [Hardware & IoT Integration](#-hardware--iot-integration)
 - [Installation & Setup](#-installation--setup)
 - [Running the Application](#-running-the-application)
-- [Contributing & License](#-contributing--license)
 
----
+
 
 ## 🌟 Overview
 
